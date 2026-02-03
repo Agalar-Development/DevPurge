@@ -39,7 +39,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git rev-parse "${{ github.event.inputs.version }}" >/dev/null 2>&1; then
+          if git tag -l "${{ github.event.inputs.version }}" | grep -q .; then
             echo "Tag ${{ github.event.inputs.version }} already exists!"
             exit 1
           fi
