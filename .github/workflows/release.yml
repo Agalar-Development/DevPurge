@@ -21,13 +21,24 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       - name: Set version from tag
-        if: github.event_name == 'push'
+        if: startsWith(github.ref, 'refs/tags/')
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       
       - name: Set version from input
         if: github.event_name == 'workflow_dispatch'
         run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+      
+      - name: Create tag for manual release
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ github.event.inputs.version }}" -m "Release ${{ github.event.inputs.version }}"
+          git push origin "${{ github.event.inputs.version }}"
       
       - name: Create Release
         id: create_release
